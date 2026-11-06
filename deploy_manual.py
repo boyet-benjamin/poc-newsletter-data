@@ -1,7 +1,9 @@
-"""Déploiement direct via l'API Workflows (contournement du bug de champ).
+"""Sonde de déploiement : teste les formes de payload acceptées par l'API.
 
-Le client Python (mistralai 3.7.0) envoie `github_url`, mais l'API attend désormais
-`repository_url`. Ce script appelle l'endpoint directement avec le bon payload.
+L'API actuelle a un décalage de schéma : le niveau externe `spec` parle de
+`repository_url`, le niveau interne `spec.workflows_worker` réclame `github_url`,
+et `revision` semble compté comme une seconde source. Ce script essaie les
+formes candidates et s'arrête à la première acceptée.
 
 Usage (depuis la racine du projet) :
     uv run --env-file .env python deploy_manual.py
@@ -14,70 +16,35 @@ import httpx
 
 API_URL = "https://api.mistral.ai/v1/workflows/deployments"
 DEPLOYMENT_NAME = "newsletter-maree"
-REPOSITORY_URL = "https://github.com/boyet-benjamin/poc-newsletter-data"
+REPO = "https://github.com/boyet-benjamin/poc-newsletter-data"
+
+BACKEND = {"type": "koyeb", "build_directory": ".", "dockerfile_path": "Dockerfile"}
 
 CANDIDATES = [
-    {
-        "name": DEPLOYMENT_NAME,
-        "hardened": True,
-        "spec": {
-            "workflows_worker": {
-                "repository_url": REPOSITORY_URL,
-                "revision": "main",
-                "backend_spec": {
-                    "type": "mistral_cloud",
-                    "build_directory": ".",
-                    "dockerfile_path": "Dockerfile",
-                },
-            }
-        },
-    },
-    {
-        "name": DEPLOYMENT_NAME,
-        "hardened": True,
-        "spec": {
-            "repository_url": REPOSITORY_URL,
-            "revision": "main",
-            "backend_spec": {
-                "type": "mistral_cloud",
-                "build_directory": ".",
-                "dockerfile_path": "Dockerfile",
-            },
-        },
-    },
-    {
-        "name": DEPLOYMENT_NAME,
-        "hardened": True,
-        "spec": {
-            "workflows_worker": {
-                "repository_url": REPOSITORY_URL,
-                "backend_spec": {
-                    "type": "mistral_cloud",
-                    "build_directory": ".",
-                    "dockerfile_path": "Dockerfile",
-                },
-            }
-        },
-    },
+    ("github_url seul (plat)", {"github_url": REPO, "backend_spec": BACKEND}),
+    ("github_url + revision (plat)", {"github_url": REPO, "revision": "main", "backend_spec": BACKEND}),
+    ("repository_url + revision (plat)", {"repository_url": REPO, "revision": "main", "backend_spec": BACKEND}),
+    ("nested workflows_worker github_url seul", {"workflows_worker": {"github_url": REPO, "backend_spec": BACKEND}}),
+    ("nested workflows_worker github_url + revision", {"workflows_worker": {"github_url": REPO, "revision": "main", "backend_spec": BACKEND}}),
 ]
 
 
 def main() -> None:
-    api_key = os.environ["MISTRAL_API_KEY"]
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
-    for index, payload in enumerate(CANDIDATES, start=1):
-        print(f"Essai {index}/{len(CANDIDATES)}...")
+    for label, spec in CANDIDATES:
+        payload = {"name": DEPLOYMENT_NAME, "hardened": True, "spec": spec}
+        print(f"Essai : {label}")
         response = httpx.post(API_URL, headers=headers, json=payload, timeout=120)
         print(f"  HTTP {response.status_code}")
         if response.status_code in (200, 201, 202):
-            print("  Déploiement accepté :")
+            print("  ✓ Déploiement accepté :")
             print(json.dumps(response.json(), indent=2, ensure_ascii=False)[:2000])
             return
-        print("  " + response.text[:500])
+        print("  " + response.text[:400].replace("\n", " "))
     print("Échec de tous les essais — collez la sortie complète dans le chat.")
 
 
