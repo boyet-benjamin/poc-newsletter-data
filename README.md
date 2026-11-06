@@ -36,3 +36,18 @@ uv run --env-file .env agents deploy
 ```bash
 uv run --env-file .env agents chat newsletter-maree
 ```
+
+## Workflow conversationnel `newsletter-canvas` (rendu visuel dans Vibe)
+
+Le SDK Agents ne peut pas émettre de canvas ; le rendu visuel passe par un
+workflow conversationnel (SDK Workflows) déployé séparément :
+
+- `canvas_workflow.py` : récupère les marées, rédige les textes (agent durable),
+  remplit le template, **affiche le rendu exact dans un canvas `text/html`**,
+  laisse l'utilisateur le modifier, attend la validation, puis envoie via Gmail (OBO).
+- `canvas_worker.py` + `Dockerfile.canvas` : worker dédié.
+- Déploiement : `uv run --env-file .env python deploy_canvas.py`
+  (déploiement `newsletter-canvas`, hardened, contournement du bug `revision`).
+
+Une fois déployé, le workflow est **publiable dans Vibe** depuis Studio
+(bouton « Publier sur Vibe » — il retourne un `ChatAssistantWorkflowOutput`).
