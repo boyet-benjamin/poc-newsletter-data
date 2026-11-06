@@ -82,9 +82,10 @@ async def write_sections(data: dict) -> dict:
             "sans balise de code ni texte autour."
         ),
     )
-    result = await Runner.run(agent=agent, inputs=prompt)
+    chunks = await Runner.run(agent=agent, inputs=prompt)
+    raw = "".join(chunk.text for chunk in chunks if getattr(chunk, "text", None))
     try:
-        return json.loads(result.final_output)
+        return json.loads(raw)
     except (ValueError, TypeError):
         return {
             "intro": f"Voici les horaires de marée du jour à {data['site_name']}.",
