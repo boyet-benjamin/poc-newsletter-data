@@ -6,11 +6,8 @@ via le connecteur Gmail au nom de l'utilisateur qui déclenche le workflow (OBO)
 """
 
 import json
-import os
 from datetime import timedelta
-from pathlib import Path
 
-import httpx
 import mistralai.workflows as workflows
 import mistralai.workflows.plugins.mistralai as workflows_mistralai
 from mistralai.workflows import Depends
@@ -26,7 +23,6 @@ MAREE_API_BASE_URL = "https://api-maree.fr"
 DEFAULT_MAREE_SITE = "port-en-bessin"
 DEFAULT_MAREE_API_KEY = "0" * 32
 NEWSLETTER_RECIPIENT = "benjamin.boyet@arkea.com"
-TEMPLATE_PATH = Path(__file__).resolve().parent / "template.html"
 
 gmail_connector = connector("gmail")
 
@@ -34,6 +30,10 @@ gmail_connector = connector("gmail")
 @workflows.activity(name="fetch-maree-data", start_to_close_timeout=timedelta(seconds=60))
 async def fetch_maree_data(site: str) -> dict:
     """Récupère les extrema de marée du jour sur api-maree.fr."""
+    import os
+
+    import httpx
+
     api_key = os.environ.get("MAREE_API_KEY") or DEFAULT_MAREE_API_KEY
     day = workflows.now().date().isoformat()
     params = {
@@ -107,6 +107,10 @@ async def render_newsletter(data: dict, sections: dict) -> dict:
             f"{coef}"
             "</tr>"
         )
+    from pathlib import Path
+
+    template_path = Path(__file__).resolve().parent / "template.html"
+    template = template_path.read_text(encoding="utf-8")
     marees_html = (
         "<table style='width:100%;border-collapse:collapse;font-size:14px;'>"
         "<tr><th style='text-align:left;padding:8px;'>Type</th>"
@@ -116,7 +120,6 @@ async def render_newsletter(data: dict, sections: dict) -> dict:
         + "".join(rows)
         + "</table>"
     )
-    template = TEMPLATE_PATH.read_text(encoding="utf-8")
     values = {
         "DATE": day["date"],
         "SITE_NAME": data["site_name"],
