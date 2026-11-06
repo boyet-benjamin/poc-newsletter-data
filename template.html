@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Newsletter Marée</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:Arial,Helvetica,sans-serif;color:#1d2b3a;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f7fa;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(29,43,58,0.08);">
+
+          <!-- En-tête -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0b4f6c,#1d7fa3);padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;font-size:26px;color:#ffffff;letter-spacing:1px;">🌊 Newsletter Marée</h1>
+              <p style="margin:8px 0 0;font-size:14px;color:#cfe8f3;">{{DATE}} — {{SITE_NAME}}</p>
+            </td>
+          </tr>
+
+          <!-- Introduction -->
+          <tr>
+            <td style="padding:32px 40px 8px;">
+              <p style="margin:0;font-size:15px;line-height:1.6;">{{INTRO}}</p>
+            </td>
+          </tr>
+
+          <!-- Horaires de marée -->
+          <tr>
+            <td style="padding:24px 40px;">
+              <h2 style="margin:0 0 16px;font-size:18px;color:#0b4f6c;border-bottom:2px solid #1d7fa3;padding-bottom:8px;">⏱️ Horaires de marée</h2>
+              {{MAREES}}
+            </td>
+          </tr>
+
+          <!-- Conseil du jour -->
+          <tr>
+            <td style="padding:0 40px 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef6fb;border-left:4px solid #1d7fa3;border-radius:8px;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <h2 style="margin:0 0 8px;font-size:16px;color:#0b4f6c;">💡 Le conseil du jour</h2>
+                    <p style="margin:0;font-size:14px;line-height:1.6;">{{CONSEIL}}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Pied de page -->
+          <tr>
+            <td style="background-color:#f0f3f6;padding:20px 40px;text-align:center;">
+              <p style="margin:0;font-size:11px;line-height:1.5;color:#6b7a89;">
+                Données de marée fournies par <a href="https://api-maree.fr/" style="color:#1d7fa3;">api-maree.fr</a> sous licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" style="color:#1d7fa3;">CC BY</a>, calculées à partir de composantes harmoniques Ifremer / PREVIMER, elles-mêmes sous licence CC BY.<br>
+                L'utilisation et l'interprétation des données relèvent de la responsabilité de l'utilisateur.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
