@@ -31,11 +31,12 @@ gmail_connector = connector("gmail")
 async def fetch_maree_data(site: str) -> dict:
     """Récupère les extrema de marée du jour sur api-maree.fr."""
     import os
+    from datetime import datetime, timezone
 
     import httpx
 
     api_key = os.environ.get("MAREE_API_KEY") or DEFAULT_MAREE_API_KEY
-    day = workflows.now().date().isoformat()
+    day = datetime.now(timezone.utc).date().isoformat()
     params = {
         "site": site,
         "from": day,
